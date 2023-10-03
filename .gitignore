@@ -1,0 +1,7 @@
+.o
+.out
+output/*
+output
+*.out
+nqueens
+*docx
