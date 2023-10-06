@@ -4,6 +4,7 @@
 #include <time.h>
 
 int m;
+int m_minus_1;
 
 void printBoard(int* queens) {
     for (int i = 0; i < m; i++) {
@@ -57,6 +58,26 @@ void build_conflicts(int* queens, int* conflicts) {
     free(anti_diag_conflicts);
 }
 
+void construct_A(int* queens) {
+    int n = m / 2;
+    for (int k = 1; k <= n; k++) {
+        queens[k-1] = 2*k-1;
+        queens[2*n-k] = 2*n-2*k;
+    }
+}
+
+void construct_B(int* queens) {
+    int n = m / 2;
+    for (int k = 1; k <= n; k++) {
+        queens[k-1] = (1 + (2*(k-1) + n-1) % m) - 1;
+        queens[2*n-k] = (2*n - (2*(k-1) + n-1) % m) - 1;
+    }
+}
+
+void construct_C(int* queens) {
+    queens[m-1] = m-1;
+}
+
 int main() {
     printf("Enter the maximum value of m: ");
     scanf("%d", &m);
@@ -67,30 +88,32 @@ int main() {
     }
 
     int* queens = (int*)malloc(m * sizeof(int));
-    int* conflicts = (int*)malloc(m * sizeof(int));
     for (int i = 0; i < m; i++) {
         queens[i] = -1;
-        conflicts[i] = 0;
     }
 
-    // Construct the board (using method A as an example)
-    int n = m / 2;
-    for (int k = 1; k <= n; k++) {
-        queens[k-1] = 2*k-1;
-        queens[2*n-k] = 2*n-2*k;
+    if (m % 2 == 0) {
+        if (m % 6 != 2 && m % 6 != 3) {
+            construct_A(queens);
+        } else {
+            construct_B(queens);
+        }
+    } else if ((m - 1) % 6 != 0 && (m - 1) % 6 != 2) {
+    construct_C(queens);
+    } else {
+        printf("No solution for m = %d based on provided constructions.\n", m);
+        free(queens);
+        return 1;
     }
-
-    build_conflicts(queens, conflicts);
-    
-    //printBoard(queens);
     int total_conflicts = 0;
+    int* conflicts = (int*)malloc(m * sizeof(int));
+    build_conflicts(queens, conflicts);
     for (int i = 0; i < m; i++) {
         total_conflicts += conflicts[i];
     }
     printf("Total conflicts: %d\n", total_conflicts);
-    printf("\n");
-
-    free(queens);
     free(conflicts);
+    //printBoard(queens);
+    free(queens);
     return 0;
 }
